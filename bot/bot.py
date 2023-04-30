@@ -34,6 +34,7 @@ import config
 import database
 import openai_utils
 
+from custom_handlers import allow_user
 
 # setup
 db = database.Database()
@@ -42,28 +43,20 @@ logger = logging.getLogger(__name__)
 user_semaphores = {}
 user_tasks = {}
 
-HELP_MESSAGE = """Commands:
-⚪ /retry – Regenerate last bot answer
-⚪ /new – Start new dialog
-⚪ /mode – Select chat mode
-⚪ /settings – Show settings
-⚪ /balance – Show balance
-⚪ /help – Show help
+HELP_MESSAGE = """Команды:
+⚪ /retry – Повторить последний ответ бота
+⚪ /new – Начать новый диалог
+⚪ /mode – Выбрать режим чата
+⚪ /settings – Показать настройки
+⚪ /balance – Показать баланс
+⚪ /help – Показать помощь
 
-🎨 Generate images from text prompts in <b>👩‍🎨 Artist</b> /mode
-👥 Add bot to <b>group chat</b>: /help_group_chat
-🎤 You can send <b>Voice Messages</b> instead of text
+🎨 Создавайте изображения на основе текстовых подсказок в режиме <b>👩‍🎨 Художник</b>
+🎤 Вместо текста вы можете отправлять <b>голосовые сообщения</b>.
 """
 
-HELP_GROUP_CHAT_MESSAGE = """You can add bot to any <b>group chat</b> to help and entertain its participants!
+HELP_GROUP_CHAT_MESSAGE = """
 
-Instructions (see <b>video</b> below):
-1. Add the bot to the group chat
-2. Make it an <b>admin</b>, so that it can see messages (all other rights can be restricted)
-3. You're awesome!
-
-To get a reply from the bot in the chat – @ <b>tag</b> it or <b>reply</b> to its message.
-For example: "{bot_username} write a poem about Telegram"
 """
 
 
@@ -651,12 +644,12 @@ async def error_handle(update: Update, context: CallbackContext) -> None:
 
 async def post_init(application: Application):
     await application.bot.set_my_commands([
-        BotCommand("/new", "Start new dialog"),
-        BotCommand("/mode", "Select chat mode"),
-        BotCommand("/retry", "Re-generate response for previous query"),
-        BotCommand("/balance", "Show balance"),
-        BotCommand("/settings", "Show settings"),
-        BotCommand("/help", "Show help message"),
+        BotCommand("/new", "Начать новый диалог"),
+        BotCommand("/mode", "Выбрать режим чата"),
+        BotCommand("/retry", "Повторить ответ на предыдущий запрос"),
+        BotCommand("/balance", "Показать баланс"),
+        BotCommand("/settings", "Показать настройки"),
+        BotCommand("/help", "Показать сообщение помощи"),
     ])
 
 def run_bot() -> None:
@@ -695,6 +688,8 @@ def run_bot() -> None:
     application.add_handler(CallbackQueryHandler(set_settings_handle, pattern="^set_settings"))
 
     application.add_handler(CommandHandler("balance", show_balance_handle, filters=user_filter))
+
+    application.add_handler(CommandHandler("groz_allow_user", allow_user, filters=user_filter))
 
     application.add_error_handler(error_handle)
 
