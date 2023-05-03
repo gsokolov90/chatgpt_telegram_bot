@@ -694,7 +694,8 @@ def run_bot() -> None:
     application.add_error_handler(error_handle)
 
     # start the bot
-    application.run_polling()
+    while True:
+            application.run_polling()
 
 
 if __name__ == "__main__":
